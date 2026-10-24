@@ -1,16 +1,17 @@
 # Terraform AWS Infrastructure
 
-Reusable, environment-aware AWS infrastructure using Terraform. No resources are created until you explicitly run an approved apply.
+Reusable, environment-aware AWS infrastructure using Terraform. This repository is designed to be reviewed and validated before any human-approved deployment.
 
-## Features
-- Reusable VPC module: public/private subnets, route tables, internet gateway
-- Optional EC2 module with IMDSv2 required and encrypted root EBS
-- Separate dev and prod roots
-- CI formatting, validation and Checkov security scan
-- No committed credentials or state files
+## Capabilities
+- Reusable VPC module with public/private subnets, route tables and internet gateway
+- Optional EC2 module with no public IP, required IMDSv2 and encrypted root EBS
+- Separate development and production root modules
+- Input validation for CIDR syntax, subnet/AZ list lengths and optional EC2 AMI
+- GitHub Actions formatting and validation for both environments
+- Checkov security scan (currently advisory/soft-fail)
 
 ## Quick start
-Prerequisites: Terraform >= 1.6, AWS CLI v2, and an explicitly selected AWS account/profile.
+Prerequisites: Terraform >= 1.6, AWS CLI v2 and a deliberately selected AWS account/profile.
 
 ```bash
 terraform -chdir=environments/dev init
@@ -19,22 +20,20 @@ terraform -chdir=environments/dev validate
 terraform -chdir=environments/dev plan
 ```
 
-EC2 is disabled by default. The network plan still proposes billable/account resources if applied; review the plan and AWS costs before applying. CI never applies infrastructure.
+Review the plan and estimated costs. Do not apply without approval. CI never runs `terraform apply` and does not deploy resources.
 
-## Credentials
-Use AWS CLI profiles or short-lived federation; never commit access keys, state, or secret tfvars. Confirm the target with `aws sts get-caller-identity`. Configure an encrypted, versioned remote backend and locking strategy separately before team/production use.
+## Safety defaults
+- EC2 is disabled by default.
+- No public IP is assigned to the optional instance.
+- IMDSv2 is required and the root volume is encrypted.
+- Inbound security-group rules are empty unless HTTPS CIDRs are explicitly configured.
+- No NAT gateway is provisioned by default.
+- Credentials, state and plan files must stay out of Git.
 
-## Modules
-- `modules/network`: VPC, public/private subnets and route tables. No NAT gateway by default.
-- `modules/compute`: opt-in EC2 instance, no public IP, IMDSv2 required, encrypted root volume, no ingress unless configured.
+## Documentation
+- [Architecture and module contracts](docs/architecture.md)
+- [Operations checklist](docs/operations.md)
+- [Cost and change controls](docs/cost-control.md)
+- [Security notes](docs/security.md)
 
-## Environments
-- `environments/dev`
-- `environments/prod`
-
-Availability zones must exist in the selected region and CIDRs must not overlap existing networks. The production root is a starting point, not a production certification.
-
-## Cleanup
-For resources you intentionally applied, inspect and run `terraform -chdir=environments/dev destroy`. Verify the account afterwards for any resources not tracked by this state.
-
-No AWS deployment is claimed by this repository.
+The production root is an educational starting point, not a production certification. Account-specific deployment, costs, IAM, remote state, monitoring, backup and disaster recovery still require deliberate configuration and review.
