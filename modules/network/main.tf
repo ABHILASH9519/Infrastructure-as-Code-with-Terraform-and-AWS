@@ -4,12 +4,10 @@ resource "aws_vpc" "this" {
   enable_dns_hostnames = true
   tags                 = merge(var.tags, { Name = "${var.name}-vpc" })
 }
-
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
   tags   = merge(var.tags, { Name = "${var.name}-igw" })
 }
-
 resource "aws_subnet" "public" {
   count                   = length(var.public_subnet_cidrs)
   vpc_id                  = aws_vpc.this.id
@@ -21,7 +19,6 @@ resource "aws_subnet" "public" {
     Tier = "public"
   })
 }
-
 resource "aws_subnet" "private" {
   count             = length(var.private_subnet_cidrs)
   vpc_id            = aws_vpc.this.id
@@ -32,7 +29,6 @@ resource "aws_subnet" "private" {
     Tier = "private"
   })
 }
-
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
   route {
@@ -41,19 +37,16 @@ resource "aws_route_table" "public" {
   }
   tags = merge(var.tags, { Name = "${var.name}-public-rt" })
 }
-
 resource "aws_route_table_association" "public" {
   count          = length(aws_subnet.public)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
-
 resource "aws_route_table" "private" {
   count  = length(var.private_subnet_cidrs)
   vpc_id = aws_vpc.this.id
   tags   = merge(var.tags, { Name = "${var.name}-private-${count.index + 1}-rt" })
 }
-
 resource "aws_route_table_association" "private" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id
