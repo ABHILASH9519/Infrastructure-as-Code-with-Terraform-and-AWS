@@ -24,8 +24,13 @@ variable "private_subnet_cidrs" {
 }
 variable "availability_zones" {
   type        = list(string)
-  description = "Must be valid in the selected region."
+  description = "Must be valid in the selected region and match both subnet lists."
   default     = ["ap-south-1a", "ap-south-1b"]
+
+  validation {
+    condition     = length(var.availability_zones) > 0 && length(var.availability_zones) == length(var.public_subnet_cidrs) && length(var.availability_zones) == length(var.private_subnet_cidrs)
+    error_message = "Provide one availability zone for every public and private subnet."
+  }
 }
 variable "enable_ec2" {
   type        = bool
@@ -34,8 +39,13 @@ variable "enable_ec2" {
 }
 variable "ami_id" {
   type        = string
-  description = "Region-compatible AMI ID."
+  description = "Region-compatible AMI ID. Required when enable_ec2 is true."
   default     = ""
+
+  validation {
+    condition     = !var.enable_ec2 || can(regex("^ami-[0-9a-fA-F]+$", var.ami_id))
+    error_message = "When enable_ec2 is true, ami_id must be a valid-looking AMI ID for the selected region."
+  }
 }
 variable "ec2_subnet_id" {
   type        = string
@@ -50,6 +60,11 @@ variable "allowed_ingress_cidrs" {
   type        = list(string)
   description = "CIDRs allowed to access TCP 443; empty by default."
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.allowed_ingress_cidrs : can(cidrhost(cidr, 0))])
+    error_message = "Every allowed_ingress_cidrs entry must be a valid IPv4 CIDR."
+  }
 }
 variable "tags" {
   type = map(string)
