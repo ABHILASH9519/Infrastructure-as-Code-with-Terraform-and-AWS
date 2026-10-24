@@ -1,12 +1,15 @@
 name: Terraform checks
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -15,24 +18,22 @@ jobs:
       matrix:
         environment: [dev, prod]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.8
-      - run: terraform fmt -recursive
-        name: Format Terraform files
-      - run: terraform fmt -check -recursive
-        name: Verify formatted files
-      - run: terraform -chdir=environments/${{ matrix.environment }} init -backend=false -input=false
-        name: Initialize without backend
-      - run: terraform -chdir=environments/${{ matrix.environment }} validate
-        name: Validate
+      - name: Verify committed Terraform formatting
+        run: terraform fmt -check -recursive
+      - name: Initialize without backend
+        run: terraform -chdir=environments/${{ matrix.environment }} init -backend=false -input=false
+      - name: Validate
+        run: terraform -chdir=environments/${{ matrix.environment }} validate
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bridgecrewio/checkov-action@v12
         with:
           directory: .
           framework: terraform
-          soft_fail: true
+          soft_fail: false
