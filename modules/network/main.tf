@@ -12,9 +12,17 @@ resource "aws_default_security_group" "this" {
   tags    = merge(var.tags, { Name = "${var.name}-default-sg" })
 }
 
+resource "aws_kms_key" "flow_logs" {
+  description             = "Encrypt VPC flow logs for ${var.name}"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+  tags                    = var.tags
+}
+
 resource "aws_cloudwatch_log_group" "flow_logs" {
   name              = "/aws/vpc/${var.name}/flow-logs"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.flow_logs.arn
   tags              = var.tags
 }
 
