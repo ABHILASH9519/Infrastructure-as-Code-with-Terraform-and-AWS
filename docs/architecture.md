@@ -1,5 +1,7 @@
 # Architecture and module contracts
 
+Diagrams are embedded as standalone SVG files for consistent rendering in Markdown viewers.
+
 ## Environment roots
 
 `environments/dev` and `environments/prod` are separate Terraform root modules. Each selects the AWS provider region, supplies environment-specific CIDR ranges and tags, and composes reusable modules.
@@ -20,45 +22,15 @@
 
 ## Architecture diagram
 
-```mermaid
-flowchart TB
-    subgraph Roots["Environment root modules"]
-      Dev[dev root]
-      Prod[prod root]
-    end
-    Dev --> Network[Reusable network module]
-    Prod --> Network
-    Dev --> Compute[Optional compute module]
-    Prod --> Compute
-    Network --> VPC[VPC]
-    VPC --> IGW[Internet Gateway]
-    VPC --> Public[Public subnets + route table]
-    VPC --> Private[Private subnets + route table]
-    Compute --> EC2[EC2 instance: opt-in]
-    EC2 --> SG[Security group: inbound empty by default]
-    EC2 --> EBS[Encrypted EBS + IMDSv2]
-    CI[GitHub Actions] --> Validation[fmt + init backend-free + validate]
-    CI --> Checkov[Checkov scan: advisory / soft-fail]
-    style Network fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95
-    style VPC fill:#DBEAFE,stroke:#2563EB,color:#1E3A8A
-    style EC2 fill:#DCFCE7,stroke:#16A34A,color:#14532D
-```
+![System architecture](images/system-architecture.svg)
+
+[Open system architecture diagram](images/system-architecture.svg)
 
 ## Provisioning and review workflow
 
-```mermaid
-flowchart LR
-    Edit[Edit environment inputs] --> Format[terraform fmt]
-    Format --> Init[terraform init -backend=false]
-    Init --> Validate[terraform validate]
-    Validate --> Scan[Checkov scan]
-    Scan --> Plan[Review plan and cost]
-    Plan --> Approval{Human approval}
-    Approval -- No --> Edit
-    Approval -- Yes --> Apply[Operator-run apply]
-    style Approval fill:#FEF3C7,stroke:#D97706,color:#78350F
-    style Apply fill:#DCFCE7,stroke:#16A34A,color:#14532D
-```
+![Workflow diagram](images/provisioning-workflow.svg)
+
+[Open workflow diagram](images/provisioning-workflow.svg)
 
 ## Trust boundaries and limitations
 
