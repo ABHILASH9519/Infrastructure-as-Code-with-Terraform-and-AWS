@@ -28,43 +28,15 @@ Reusable, environment-aware AWS infrastructure using Terraform. This repository 
 
 ## 🧭 Architecture
 
-```mermaid
-flowchart TB
-    Dev[environments/dev] --> Net[Reusable network module]
-    Prod[environments/prod] --> Net
-    Dev --> Compute[Optional compute module]
-    Prod --> Compute
-    Net --> VPC[VPC]
-    VPC --> IGW[Internet Gateway]
-    VPC --> Pub[Public subnets + route table]
-    VPC --> Priv[Private subnets + route table]
-    Compute --> EC2[Optional EC2 instance]
-    EC2 --> SG[Security Group: no inbound by default]
-    EC2 --> EBS[Encrypted root EBS + IMDSv2]
-    CI[GitHub Actions] --> Fmt[Terraform format + validate]
-    CI --> Scan[Checkov security scan]
-    style Net fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95
-    style VPC fill:#DBEAFE,stroke:#2563EB,color:#1E3A8A
-    style EC2 fill:#DCFCE7,stroke:#16A34A,color:#14532D
-    style CI fill:#FEF3C7,stroke:#D97706,color:#78350F
-```
+![System architecture](docs/images/system-architecture.svg)
+
+[Open system architecture diagram](docs/images/system-architecture.svg)
 
 ## 🔄 Provisioning flow
 
-```mermaid
-flowchart TD
-    A[Review environment variables] --> B[terraform fmt]
-    B --> C[terraform init -backend=false]
-    C --> D[terraform validate]
-    D --> E[Checkov scan]
-    E --> F[Review terraform plan and cost]
-    F --> G{Human approval?}
-    G -- No --> H[Revise configuration]
-    H --> A
-    G -- Yes --> I[Operator applies manually]
-    style G fill:#FEF3C7,stroke:#D97706,color:#78350F
-    style I fill:#DCFCE7,stroke:#16A34A,color:#14532D
-```
+![Workflow diagram](docs/images/provisioning-workflow.svg)
+
+[Open workflow diagram](docs/images/provisioning-workflow.svg)
 
 ## ⚡ Quick start
 
