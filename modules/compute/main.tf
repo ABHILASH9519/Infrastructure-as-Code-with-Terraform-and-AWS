@@ -3,7 +3,7 @@ data "aws_subnet" "selected" {
 }
 
 resource "aws_iam_role" "instance" {
-  name               = "${var.name}-ec2-role"
+  name = "${var.name}-ec2-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
