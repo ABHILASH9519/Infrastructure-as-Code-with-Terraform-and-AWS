@@ -24,7 +24,7 @@ Reusable, environment-aware AWS infrastructure using Terraform. This repository 
 - Separate development and production root modules
 - Input validation for CIDR syntax, subnet/AZ list lengths and optional EC2 AMI
 - GitHub Actions formatting and validation for both environments
-- Checkov security scan (currently advisory/soft-fail)
+- Checkov security scan that fails CI when policy findings are reported
 
 ## 🧭 Architecture
 
