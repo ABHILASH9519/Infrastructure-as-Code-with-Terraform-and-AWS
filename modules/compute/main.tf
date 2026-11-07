@@ -3,12 +3,14 @@ data "aws_subnet" "selected" {
 }
 
 resource "aws_iam_role" "instance" {
-  name = "${var.name}-ec2-role"
+  name               = "${var.name}-ec2-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
-      Principal = { Service = "ec2.amazonaws.com" }
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
       Action = "sts:AssumeRole"
     }]
   })
@@ -33,6 +35,7 @@ resource "aws_security_group" "this" {
 
   dynamic "ingress" {
     for_each = var.allowed_ingress_cidrs
+
     content {
       description = "Explicitly configured HTTPS ingress"
       from_port   = 443
