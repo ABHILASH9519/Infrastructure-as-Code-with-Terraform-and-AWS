@@ -44,7 +44,7 @@ resource "aws_cloudwatch_log_group" "flow_logs" {
 }
 
 resource "aws_iam_role" "flow_logs" {
-  name               = "${var.name}-vpc-flow-logs"
+  name = "${var.name}-vpc-flow-logs"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
