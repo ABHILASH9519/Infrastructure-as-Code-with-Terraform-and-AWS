@@ -8,7 +8,7 @@ variable "vpc_cidr" {
   default     = "10.20.0.0/16"
 
   validation {
-    condition     = can(cidrhost(var.vpc_cidr, 0))
+    condition     = can(cidrnetmask(var.vpc_cidr))
     error_message = "vpc_cidr must be a valid IPv4 CIDR block."
   }
 }
@@ -18,8 +18,11 @@ variable "public_subnet_cidrs" {
   default     = ["10.20.1.0/24", "10.20.2.0/24"]
 
   validation {
-    condition     = length(var.public_subnet_cidrs) > 0 && alltrue([for cidr in var.public_subnet_cidrs : can(cidrhost(cidr, 0))])
-    error_message = "public_subnet_cidrs must contain at least one valid IPv4 CIDR."
+    condition = length(var.public_subnet_cidrs) > 0 && alltrue([
+      for cidr in var.public_subnet_cidrs :
+      can(cidrnetmask(cidr)) && can(cidrcontains(var.vpc_cidr, cidrhost(cidr, 0))) && cidrcontains(var.vpc_cidr, cidrhost(cidr, 0))
+    ])
+    error_message = "public_subnet_cidrs must contain valid IPv4 networks whose network addresses are inside vpc_cidr."
   }
 }
 variable "private_subnet_cidrs" {
@@ -28,8 +31,11 @@ variable "private_subnet_cidrs" {
   default     = ["10.20.11.0/24", "10.20.12.0/24"]
 
   validation {
-    condition     = length(var.private_subnet_cidrs) > 0 && alltrue([for cidr in var.private_subnet_cidrs : can(cidrhost(cidr, 0))])
-    error_message = "private_subnet_cidrs must contain at least one valid IPv4 CIDR."
+    condition = length(var.private_subnet_cidrs) > 0 && alltrue([
+      for cidr in var.private_subnet_cidrs :
+      can(cidrnetmask(cidr)) && can(cidrcontains(var.vpc_cidr, cidrhost(cidr, 0))) && cidrcontains(var.vpc_cidr, cidrhost(cidr, 0))
+    ])
+    error_message = "private_subnet_cidrs must contain valid IPv4 networks whose network addresses are inside vpc_cidr."
   }
 }
 variable "availability_zones" {
