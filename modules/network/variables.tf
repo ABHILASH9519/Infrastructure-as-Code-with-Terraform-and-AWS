@@ -20,7 +20,7 @@ variable "public_subnet_cidrs" {
   validation {
     condition = length(var.public_subnet_cidrs) > 0 && alltrue([
       for cidr in var.public_subnet_cidrs :
-      can(cidrnetmask(cidr)) && tonumber(split("/", cidr)[1]) > tonumber(split("/", var.vpc_cidr)[1]) && cidrcontains(var.vpc_cidr, cidrhost(cidr, 0))
+      can(cidrnetmask(cidr)) && can(tonumber(split("/", cidr)[1]) > tonumber(split("/", var.vpc_cidr)[1]) && cidrcontains(var.vpc_cidr, cidrhost(cidr, 0)))
     ])
     error_message = "public_subnet_cidrs must contain valid IPv4 networks whose network addresses are inside vpc_cidr."
   }
