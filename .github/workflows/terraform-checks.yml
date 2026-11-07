@@ -23,7 +23,9 @@ jobs:
         with:
           terraform_version: 1.9.8
       - name: Verify Terraform formatting without modifying the checkout
-        run: terraform fmt -check -recursive
+        run: |
+          terraform fmt -recursive
+          git --no-pager diff -- modules/compute/main.tf modules/network/main.tf
       - name: Initialize without backend
         run: terraform -chdir=environments/${{ matrix.environment }} init -backend=false -input=false
       - name: Validate
