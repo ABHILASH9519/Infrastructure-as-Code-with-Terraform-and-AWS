@@ -22,9 +22,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.8
-      - name: Format Terraform files
-        run: terraform fmt -recursive
-      - name: Verify formatted Terraform files
+      - name: Verify Terraform formatting without modifying the checkout
         run: terraform fmt -check -recursive
       - name: Initialize without backend
         run: terraform -chdir=environments/${{ matrix.environment }} init -backend=false -input=false
